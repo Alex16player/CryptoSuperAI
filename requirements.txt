@@ -1,8 +1,11 @@
+streamlit
 pandas
 numpy
-matplotlib
 scikit-learn
-xgboost
-tensorflow
+matplotlib
 plotly
-streamlit
+tensorflow
+xgboost
+ccxt
+ta
+joblib
