@@ -28,7 +28,7 @@ if 'df_log' in locals():
     col1.metric("Anzahl Trades", len(df_log))
     if 'Gewinn' in df_log.columns:
         col2.metric("Durchschn. Gewinn", f"{df_log['Gewinn'].mean():.2f}")
-    if 'Rendite %" in df_log.columns:
+    if 'Rendite %' in df_log.columns:
         col3.metric("Rendite %", f"{df_log['Rendite %'].sum():.2f}%")
 
 # 📦 Modelle anzeigen
