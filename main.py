@@ -1,51 +1,74 @@
-
-# 🚀 Streamlit WebApp für CryptoTradingAI
+# 🚀 CryptoSuperAI - Vollständige Streamlit-WebApp
 import streamlit as st
 import pandas as pd
 import os
+import subprocess
 
-# Basisverzeichnisse
-data_path = "./data"
-log_path = "./trades"
-model_path = "./models"
+# 🔧 Ordnerpfade definieren
+base_path = "./CryptoTradingAI"
+data_path = os.path.join(base_path, "data")
+model_path = os.path.join(base_path, "models")
+log_path = os.path.join(base_path, "trades")
+report_path = os.path.join(base_path, "reports")
+super_ai_path = os.path.join(base_path, "super_ai")
 
-# Titel
+# 🌐 Streamlit App Setup
 st.set_page_config(page_title="CryptoSuperAI Dashboard", layout="wide")
-st.title("🚀 CryptoSuperAI Trading Dashboard")
+st.title("🚀 CryptoSuperAI - Zentrale KI-Trading WebApp")
 
-# 📥 Trade Log laden
-log_file = os.path.join(log_path, "trade_log.csv")
-if os.path.exists(log_file):
-    df_log = pd.read_csv(log_file)
-    st.subheader("📈 Letzte Trades")
-    st.dataframe(df_log.tail(20))
-else:
-    st.warning("Keine trade_log.csv gefunden.")
+# 📌 Tab-Navigation
+TABS = ["📊 Dashboard", "📈 Trading", "🧠 Modelltraining", "📄 Reports"]
+selected_tab = st.sidebar.radio("Navigation", TABS)
 
-# 📊 KPI-Übersicht
-if 'df_log' in locals():
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Anzahl Trades", len(df_log))
-    if 'Gewinn' in df_log.columns:
-        col2.metric("Durchschn. Gewinn", f"{df_log['Gewinn'].mean():.2f}")
-    if 'Rendite %' in df_log.columns:
-        col3.metric("Rendite %", f"{df_log['Rendite %'].sum():.2f}%")
+# =============== 📊 Dashboard ===============
+if selected_tab == "📊 Dashboard":
+    st.subheader("📥 Trade Log")
+    trade_log = os.path.join(log_path, "trade_log.csv")
+    if os.path.exists(trade_log):
+        df_log = pd.read_csv(trade_log)
+        st.dataframe(df_log.tail(20))
+        st.metric("Anzahl Trades", len(df_log))
+        if 'Gewinn' in df_log.columns:
+            st.metric("Durchschnittlicher Gewinn", round(df_log['Gewinn'].mean(), 2))
+    else:
+        st.warning("Keine trade_log.csv gefunden.")
 
-# 📦 Modelle anzeigen
-if os.path.exists(model_path):
-    model_files = os.listdir(model_path)
-    st.subheader("🧠 Verfügbare Modelle")
-    st.write(model_files)
-else:
-    st.warning("Kein Modelle-Ordner gefunden.")
+# =============== 📈 Trading ===============
+elif selected_tab == "📈 Trading":
+    st.subheader("⚙️ Strategien & Super-KI steuern")
 
-# 📁 Daten durchsuchen
-if os.path.exists(data_path):
-    st.subheader("📂 Daten")
-    files = os.listdir(data_path)
-    selected_file = st.selectbox("Wähle eine CSV-Datei:", [f for f in files if f.endswith('.csv')])
-    if selected_file:
-        df = pd.read_csv(os.path.join(data_path, selected_file))
-        st.write(df.head())
-else:
-    st.warning("Datenordner nicht gefunden.")
+    col1, col2 = st.columns(2)
+
+    if col1.button("▶️ Super-KI starten"):
+        with st.spinner("Super-KI läuft..."):
+            subprocess.Popen(["python3", os.path.join(super_ai_path, "decision_engine.py")])
+        st.success("Super-KI gestartet!")
+
+    if col2.button("⏹️ Super-KI stoppen"):
+        subprocess.run(["pkill", "-f", "decision_engine.py"])
+        st.info("Super-KI gestoppt")
+
+# =============== 🧠 Modelltraining ===============
+elif selected_tab == "🧠 Modelltraining":
+    st.subheader("📦 Trainiere ein Modell")
+
+    model_options = [f for f in os.listdir(super_ai_path) if f.startswith("train_") and f.endswith(".ipynb")]
+    model_file = st.selectbox("Wähle ein Trainings-Notebook:", model_options)
+
+    if st.button("🚀 Training starten"):
+        st.info(f"Starte Training: {model_file}")
+        subprocess.run(["jupyter", "nbconvert", "--to", "notebook", "--execute", os.path.join(super_ai_path, model_file)])
+        st.success("Training abgeschlossen")
+
+# =============== 📄 Reports ===============
+elif selected_tab == "📄 Reports":
+    st.subheader("📑 Reports anzeigen")
+
+    html_reports = [f for f in os.listdir(report_path) if f.endswith(".html")]
+    selected_report = st.selectbox("Wähle einen HTML-Report:", html_reports)
+
+    if selected_report:
+        with open(os.path.join(report_path, selected_report), "r", encoding="utf-8") as f:
+            html_content = f.read()
+            st.components.v1.html(html_content, height=800, scrolling=True)
+
